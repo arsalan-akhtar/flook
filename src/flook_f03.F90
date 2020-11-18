@@ -396,6 +396,20 @@ module flook
 
    contains
 
+     ! Initializes a new table
+     !> @cond SHOW_PRIVATE
+     procedure, pass :: tbl_init_
+     !> @endcond
+
+     !> Initializes a table attaching it to a Lua state
+     !!
+     !! This is mainly for initializing a table without the
+     !! need for opening a table.
+     !!
+     !! \param[inout] luaTbl the table
+     !! \param[in] @luaState C-state of Lua
+     generic, public :: init => tbl_init_
+
      ! Create a new table and push it on this object
      !> @cond SHOW_PRIVATE
      procedure, pass :: tbl_open_
@@ -848,6 +862,16 @@ contains
   ! Here we have functions related to the table object
 
   !> @cond SHOW_PRIVATE
+
+  !> @isee luaTbl::init
+  subroutine tbl_init_(tbl,state)
+    class(luaTbl), intent(inout) :: tbl
+    type(luaState), intent(in), target :: lua
+
+    call tbl%close()
+    tbl%lua => lua
+
+  end subroutine tbl_init_
 
   !> @isee luaTbl::open
   recursive subroutine tbl_open_(tbl,name,lvls)
@@ -1395,7 +1419,7 @@ contains
     s(:) = size(val)
     !call tbl%set('type', 'logical')
     call tbl%set('size', s)
-    ptr = c_loc(val)
+    ptr = c_loc(val(1))
     call aot_table_set_val(ptr,tbl%lua%L,thandle=tbl%h, key = 'ptr')
   end subroutine set_ptr_b_1d_
 
@@ -1421,7 +1445,7 @@ contains
     call reverse_(s)
     !call tbl%set('type', 'logical')
     call tbl%set('size', s)
-    ptr = c_loc(val)
+    ptr = c_loc(val(1,1))
     call aot_table_set_val(ptr,tbl%lua%L,thandle=tbl%h, key = 'ptr')
   end subroutine set_ptr_b_2d_
 
@@ -1450,7 +1474,7 @@ contains
     s(:) = size(val)
     call tbl%set('type', 'int')
     call tbl%set('size', s)
-    ptr = c_loc(val)
+    ptr = c_loc(val(1))
     call aot_table_set_val(ptr,tbl%lua%L,thandle=tbl%h, key = 'ptr')
   end subroutine set_ptr_i_1d_
 
@@ -1476,7 +1500,7 @@ contains
     call reverse_(s)
     call tbl%set('type', 'int')
     call tbl%set('size', s)
-    ptr = c_loc(val)
+    ptr = c_loc(val(1,1))
     call aot_table_set_val(ptr,tbl%lua%L,thandle=tbl%h, key = 'ptr')
   end subroutine set_ptr_i_2d_
 
@@ -1505,7 +1529,7 @@ contains
     s(:) = size(val)
     call tbl%set('type', 'float')
     call tbl%set('size', s)
-    ptr = c_loc(val)
+    ptr = c_loc(val(1))
     call aot_table_set_val(ptr,tbl%lua%L,thandle=tbl%h, key = 'ptr')
   end subroutine set_ptr_s_1d_
 
@@ -1531,7 +1555,7 @@ contains
     call reverse_(s)
     call tbl%set('type', 'float')
     call tbl%set('size', s)
-    ptr = c_loc(val)
+    ptr = c_loc(val(1,1))
     call aot_table_set_val(ptr,tbl%lua%L,thandle=tbl%h, key = 'ptr')
   end subroutine set_ptr_s_2d_
 
@@ -1560,7 +1584,7 @@ contains
     s(:) = size(val)
     call tbl%set('type', 'double')
     call tbl%set('size', s)
-    ptr = c_loc(val)
+    ptr = c_loc(val(1))
     call aot_table_set_val(ptr,tbl%lua%L,thandle=tbl%h, key = 'ptr')
   end subroutine set_ptr_d_1d_
 
@@ -1586,7 +1610,7 @@ contains
     call reverse_(s)
     call tbl%set('type', 'double')
     call tbl%set('size', s)
-    ptr = c_loc(val)
+    ptr = c_loc(val(1,1))
     call aot_table_set_val(ptr,tbl%lua%L,thandle=tbl%h, key = 'ptr')
   end subroutine set_ptr_d_2d_
 
